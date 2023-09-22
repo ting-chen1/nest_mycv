@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Patch, Delete, Param, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Delete, Param, Query, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,10 +13,17 @@ export class UsersController {
   }
 
   @Get(':id')
-  findUser(@Param('id') id: string) {
+  async findUser(@Param('id') id: string) {
     // request 傳進來時，url 整體是一個字串，nest 不會自動解析成數字
     // /auth/123123 此時的 id 被視為 string
-    return this.usersService.findOne(parseInt(id))
+    // return this.usersService.findOne(parseInt(id))
+
+    // with error
+    const user = await this.usersService.findOne(parseInt(id));
+    if(!user) {
+      throw new NotFoundException('user not found')
+    }
+    return user
   }
 
   @Get()
@@ -31,7 +38,7 @@ export class UsersController {
 
   // update 同時有 url param, body param 所以要準備 dto
   @Patch('/:id')
-  update(
+  updateUser(
     @Param('id') id: string,
     @Body() body: UpdateUserDto
   ) {
