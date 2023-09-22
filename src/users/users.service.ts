@@ -42,4 +42,38 @@ export class UsersService {
   // create(email: string, password: string) {
   //   return this.repo.save({ email, password });
   // }
+
+  findOne(id: number) {
+    return this.repo.findOneBy({ id });
+  }
+
+  find(email: string) {
+    return this.repo.findBy({ email });
+  }
+
+  // 這裡使用 Partial<User> 是因為 update 行為可能更新信箱，密碼，或者同時更新，需要彈性變化
+  // 為什麼可以這樣使用， <User> 是指向 User entity， user entity 定義 id, email, password
+  // Partial 是 typescript 提供的工具，讓型別判斷知道任何傳進來的 object 的都會有參照的一項或多種屬性
+  async update(id: number, attributes: Partial<User>) {
+    // 為了取得 user entity instance ，需要先透過 orm 去 database 查詢
+    // 後續更新資料時，可以執行 hook or callback
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new Error('user not found');
+    }
+    Object.assign(user, attributes);
+    // 為了將 atrributes 的值依照對應的 key 填到 user
+    // 與 rails assign_attributes 一樣
+
+    return this.repo.save(user);
+  }
+
+  async remove(id: number) {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new Error('user not found');
+    }
+
+    return this.repo.remove(user);
+  }
 }
