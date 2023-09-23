@@ -1,7 +1,20 @@
-import { Controller, Post, Body, Get, Patch, Delete, Param, Query, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Query,
+  NotFoundException,
+  UseInterceptors,
+  // ClassSerializerInterceptor
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SerializeInterceptor } from '../interceptors/serialize.interceptor';
 
 @Controller('auth')
 export class UsersController {
@@ -12,6 +25,20 @@ export class UsersController {
     this.usersService.create(body.email, body.password);
   }
 
+  // 使用 nest 推薦的過濾器需要先在 entity 標記要去除的資訊
+  // 去除資訊是通用規則的話可以此方法
+  // 如果會根據不同情境排除不同資訊，這個方法就會出問題
+  // @UseInterceptors(ClassSerializerInterceptor)
+  // @Get(':id')
+  // async findUser(@Param('id') id: string) {
+  //    ........
+  //    ........
+  // }
+
+  // 這是使用客製化的 interceptor
+  // 可以避免預設 interceptor 使用 entity 設定 exclude 造成全域影響的問題
+  // 在客製化的 interceptor 內設定該 route 需要處理的資料即可
+  @UseInterceptors(SerializeInterceptor)
   @Get(':id')
   async findUser(@Param('id') id: string) {
     // request 傳進來時，url 整體是一個字串，nest 不會自動解析成數字
@@ -19,6 +46,7 @@ export class UsersController {
     // return this.usersService.findOne(parseInt(id))
 
     // with error
+    console.log('handler is running');
     const user = await this.usersService.findOne(parseInt(id));
     if(!user) {
       throw new NotFoundException('user not found')

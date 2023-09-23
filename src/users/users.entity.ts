@@ -6,7 +6,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
+// import { Exclude } from 'class-transformer';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -16,6 +16,11 @@ export class User {
   email: string;
 
   @Column()
+  // @Exclude() // 使用前需要引入
+  // 官方給的去除敏感資訊方法
+  // 在 entity 需要隱藏的欄位標上 Exclude
+  // 再到 controller 於該 route 使用 @UseInterceptors(ClassSerializerInterceptor)
+  // 表示該 route 會過濾這些資訊
   password: string;
 
   @AfterInsert()

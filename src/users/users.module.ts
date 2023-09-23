@@ -12,3 +12,7 @@ import { User } from './users.entity';
   providers: [UsersService],
 })
 export class UsersModule {}
+
+// request -> validation pipe(DTO) -> controller -> service -> entity  -> repository
+
+// repository -> entity -> service -> controller -> interceptor(DTO) -> response
