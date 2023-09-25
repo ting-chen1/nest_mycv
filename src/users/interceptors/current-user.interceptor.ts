@@ -2,7 +2,6 @@ import { NestInterceptor } from "@nestjs/common";
 import { ExecutionContext } from "@nestjs/common";
 import { CallHandler } from "@nestjs/common";
 import { Injectable } from "@nestjs/common";
-
 import { UsersService } from "../users.service";
 
 @Injectable()
@@ -14,7 +13,7 @@ export class CurrentUserInterceptor implements NestInterceptor {
       const request = context.switchToHttp().getRequest()
       const { userId } = request.session || {};
 
-      if(!userId) {
+      if(userId) {
         const user = await this.userService.findOne(userId)
         request.currentUser = user
         // 這裏將 user 資訊塞到 request.currentUser
