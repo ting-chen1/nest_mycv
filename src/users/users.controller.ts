@@ -9,6 +9,7 @@ import {
   Query,
   NotFoundException,
   Session,
+  UseGuards
   // UseInterceptors,
   // ClassSerializerInterceptor
 } from '@nestjs/common';
@@ -23,6 +24,7 @@ import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 // import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 import { User } from './users.entity';
+import { AuthGuard } from '../guard/auth.guard';
 
 @Controller('auth')
 @Serialize(UserDto) // 這樣是將此 interceptor 套用到整個 controller 上
@@ -43,13 +45,18 @@ export class UsersController {
   //   return this.usersService.findOne(session.userId);
   // }
 
-  @Get('/whoami')
+
   // 使用客製化 CurrentUser decorator
   // CurrentUser decorator 搭配 CurrentUserInterceptor
   // 所以能直接在 middleware 階段取得 currentUser
+  @Get('/whoami')
+  @UseGuards(AuthGuard)
+  // 於單一路徑套用 guard
+  // 未登入情況會得到 403 error
   whoAmI(@CurrentUser() user: User) {
     return user;
   }
+
 
   // @Get('/whoami')
   // 也可以不用 decorator 直接從 request 取得 currentUser
