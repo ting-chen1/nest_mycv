@@ -4,13 +4,14 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { AuthService } from './auth.service';
 import { User } from './users.entity';
+import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 
 // TypeOrmModule.forFeature 會去掉用 forRoot 的設定，
 // 但可以做出部分差異
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UsersController],
-  providers: [UsersService, AuthService],
+  providers: [UsersService, AuthService, CurrentUserInterceptor],
 })
 export class UsersModule {}
 
