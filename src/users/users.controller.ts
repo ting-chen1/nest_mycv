@@ -9,7 +9,7 @@ import {
   Query,
   NotFoundException,
   Session,
-  UseInterceptors,
+  // UseInterceptors,
   // ClassSerializerInterceptor
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -21,12 +21,13 @@ import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserDto } from './dto/user.dto';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
+// import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 import { User } from './users.entity';
 
 @Controller('auth')
 @Serialize(UserDto) // 這樣是將此 interceptor 套用到整個 controller 上
-@UseInterceptors(CurrentUserInterceptor)
+
+// @UseInterceptors(CurrentUserInterceptor) // 後續改寫成全域套用，而非 controller 這一層
 // 與先前 SerializeInterceptor 範例一樣
 // 只是 CurrentUserInterceptor 是直接使用 interceptor
 // 而 serialize 包裝成 decorator 再使用

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -11,7 +12,19 @@ import { CurrentUserInterceptor } from './interceptors/current-user.interceptor'
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UsersController],
-  providers: [UsersService, AuthService, CurrentUserInterceptor],
+  providers: [
+    UsersService,
+    AuthService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CurrentUserInterceptor
+    }
+    // 要全域使用 CurrentUserInterceptor 時
+    // provide 需明確指定提供到全域的 interceptor
+    // 再指定提供的是哪個 class
+    // 缺點是部分 controller 或 route 不需要使用 currentUser 也會執行此程式
+  ],
+  // providers: [UsersService, AuthService, CurrentUserInterceptor], // 基本寫法
 })
 export class UsersModule {}
 
