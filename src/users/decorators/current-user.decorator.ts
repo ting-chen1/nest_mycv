@@ -10,6 +10,7 @@ export const CurrentUser = createParamDecorator(
   (data: never, context: ExecutionContext) => {
     // 為了取得 session 資訊需要使用 context 資訊
     const request = context.switchToHttp().getRequest();
-    return 'hi there';
+    return request.currentUser;
+    // return 'hi there'; // previous demo
   }
 )

@@ -8,7 +8,7 @@ import {
   Param,
   Query,
   NotFoundException,
-  Session
+  Session,
   // UseInterceptors,
   // ClassSerializerInterceptor
 } from '@nestjs/common';
@@ -21,6 +21,7 @@ import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserDto } from './dto/user.dto';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
+
 @Controller('auth')
 @Serialize(UserDto) // 這樣是將此 interceptor 套用到整個 controller 上
 export class UsersController {
@@ -36,10 +37,21 @@ export class UsersController {
   // }
 
   @Get('/whoami')
-    // 使用客製化 CurrentUser decorator
+  // 使用客製化 CurrentUser decorator
+  // CurrentUser decorator 搭配 CurrentUserInterceptor
+  // 所以能直接在 middleware 階段取得 currentUser
   whoAmI(@CurrentUser() user: string) {
     return user;
   }
+
+  // @Get('/whoami')
+  // 也可以不用 decorator 直接從 request 取得 currentUser
+  // whoAmI(@Request() request: Request) {
+  //   const user = request.currentUser
+  //   return user;
+  // }
+
+  // ----------------------------------------------------
 
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
