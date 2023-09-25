@@ -8,7 +8,7 @@ import {
   Param,
   Query,
   NotFoundException,
-  UseInterceptors,
+  // UseInterceptors,
   // ClassSerializerInterceptor
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -18,16 +18,29 @@ import { UpdateUserDto } from './dto/update-user.dto';
 // 後續包成 decorator，可直接使用 decorator
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserDto } from './dto/user.dto';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 @Serialize(UserDto) // 這樣是將此 interceptor 套用到整個 controller 上
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private authService: AuthService
+  ) {}
 
   @Post('/signup')
   createUser(@Body() body: CreateUserDto) {
-    this.usersService.create(body.email, body.password);
+    // this.usersService.create(body.email, body.password); // 前期範例用
+    return this.authService.signup(body.email, body.password) // 切換成 authService
   }
+
+  @Post('/signin')
+  signin(@Body() body: CreateUserDto) {
+    return this.authService.signin(body.email, body.password);
+  }
+
+
+  // ----------------------------------------------
 
   // 使用 nest 推薦的過濾器需要先在 entity 標記要去除的資訊
   // 去除資訊是通用規則的話可以此方法
@@ -69,7 +82,6 @@ export class UsersController {
     // return this.usersService.findOne(parseInt(id))
 
     // with error
-    console.log('handler is running');
     const user = await this.usersService.findOne(parseInt(id));
     if(!user) {
       throw new NotFoundException('user not found')
