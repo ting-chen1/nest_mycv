@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   NotFoundException,
+  Session
   // UseInterceptors,
   // ClassSerializerInterceptor
 } from '@nestjs/common';
@@ -28,15 +29,32 @@ export class UsersController {
     private authService: AuthService
   ) {}
 
+  @Get('/whoami')
+  whoAmI(@Session() session: any) {
+    return this.usersService.findOne(session.userId);
+  }
+
   @Post('/signup')
-  createUser(@Body() body: CreateUserDto) {
+  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
     // this.usersService.create(body.email, body.password); // 前期範例用
-    return this.authService.signup(body.email, body.password) // 切換成 authService
+    const user = await this.authService.signup(body.email, body.password) // 切換成 authService
+    session.userId = user.id;
+    return user;
   }
 
   @Post('/signin')
-  signin(@Body() body: CreateUserDto) {
-    return this.authService.signin(body.email, body.password);
+  async signin(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signin(body.email, body.password);
+    session.userId = user.id;
+    // nest 會比對 session 紀錄是否發生變化
+    // 無變化則回傳 header 不會設定 'Set-Cookie' tag
+    // 有變化則 header 會加上 'Set-Cookie' 更新資訊
+    return user;
+  }
+
+  @Post('/signout')
+  signOut(@Session() session: any) {
+    session.userId = null;
   }
 
 
