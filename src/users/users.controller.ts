@@ -20,7 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { UserDto } from './dto/user.dto';
 import { AuthService } from './auth.service';
-
+import { CurrentUser } from './decorators/current-user.decorator';
 @Controller('auth')
 @Serialize(UserDto) // 這樣是將此 interceptor 套用到整個 controller 上
 export class UsersController {
@@ -29,9 +29,16 @@ export class UsersController {
     private authService: AuthService
   ) {}
 
+  // @Get('/whoami')
+  // 使用預設的 Session decorator
+  // whoAmI(@Session() session: any) {
+  //   return this.usersService.findOne(session.userId);
+  // }
+
   @Get('/whoami')
-  whoAmI(@Session() session: any) {
-    return this.usersService.findOne(session.userId);
+    // 使用客製化 CurrentUser decorator
+  whoAmI(@CurrentUser() user: string) {
+    return user;
   }
 
   @Post('/signup')
