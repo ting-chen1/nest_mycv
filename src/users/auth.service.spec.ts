@@ -2,7 +2,7 @@ import { Test } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UsersService } from "./users.service";
 import { User } from './users.entity';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 // jest describe 同 rspec describe
 describe('AuthService', () => {
@@ -50,23 +50,31 @@ describe('AuthService', () => {
     // 因為 js 變數 scope 的原因，所以這裡可以取用到 外層的 service
   })
 
-  it('creates a new user with a salted and hashed password', async () => {
-    const password = '12345'
-    const user = await service.signup('abc@abc.com', password)
-    // 單純比對傳入的 password 與儲存的 password 是否一致
-    expect(user.password).not.toEqual(password);
-    const [salt, hash] = user.password.split('.');
-    // 是否有加鹽
-    expect(salt).toBeDefined();
-    expect(hash).toBeDefined();
+  describe('#signup', () => {
+    it('creates a new user with a salted and hashed password', async () => {
+      const password = '12345'
+      const user = await service.signup('abc@abc.com', password)
+      // 單純比對傳入的 password 與儲存的 password 是否一致
+      expect(user.password).not.toEqual(password);
+      const [salt, hash] = user.password.split('.');
+      // 是否有加鹽
+      expect(salt).toBeDefined();
+      expect(hash).toBeDefined();
+    })
+
+    it('throws an error if user signs up with email that is in use', async () => {
+      // 直接複寫 fakeUsersService find function 來跳鞥測是資料
+      // 這裡是模擬 find function 真的有從 database 查到一筆資料，後續就拋出錯誤
+      let email = 'asdf@asdf.com'
+      fakeUsersService.find = () => Promise.resolve([{ id: 1, email, password: '1' } as User]);
+
+      await expect(service.signup(email, 'asdf')).rejects.toThrow(BadRequestException);
+    });
   })
 
-  it('throws an error if user signs up with email that is in use', async () => {
-    // 直接複寫 fakeUsersService find function 來跳鞥測是資料
-    // 這裡是模擬 find function 真的有從 database 查到一筆資料，後續就拋出錯誤
-    let email = 'asdf@asdf.com'
-    fakeUsersService.find = () => Promise.resolve([{ id: 1, email, password: '1' } as User]);
-
-    await expect(service.signup(email, 'asdf')).rejects.toThrow(BadRequestException);
-  });
+  describe('#signin', () => {
+    it('throws if signin is called with an unused email', async () => {
+      await expect(service.signin('fake_email@abc.com', 'asdf')).rejects.toThrow(NotFoundException);
+    })
+  })
 })
