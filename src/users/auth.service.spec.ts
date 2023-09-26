@@ -100,9 +100,14 @@ describe('AuthService', () => {
         // 直接複寫 fakeUsersService find function 來跳鞥測是資料
         // 這裡是模擬 find function 真的有從 database 查到一筆資料，後續就拋出錯誤
         let email = 'asdf@asdf.com'
-        fakeUsersService.find = () => Promise.resolve([{ id: 1, email, password: '1' } as User]);
+        // fakeUsersService.find = () => Promise.resolve([{ id: 1, email, password: '1' } as User]);
 
+        // await expect(service.signup(email, 'asdf')).rejects.toThrow(BadRequestException);
+
+        // 使用 v2 fakeUsersService
+        await service.signup(email, 'asdf')
         await expect(service.signup(email, 'asdf')).rejects.toThrow(BadRequestException);
+        // 使用 v2 fakeUsersService
       });
     })
   })
@@ -114,6 +119,7 @@ describe('AuthService', () => {
       })
     })
 
+    // 覆寫 fakeUsersService.find
     context('with invalid password', () => {
       const email = 'asdf@asdf.com'
 
@@ -124,7 +130,17 @@ describe('AuthService', () => {
       })
 
       it('throws BadRequestException',async () => {
-        await expect(service.signin(email, 'password')).rejects.toThrow(BadRequestException)
+        await expect(service.signin(email, 'wrong_password')).rejects.toThrow(BadRequestException)
+      })
+    })
+
+    // 將資料存在 users array 中
+    context('with invalid password', () => {
+      const email = 'asdf@asdf.com'
+      it('throws BadRequestException',async () => {
+        // 使用 v2 fakeUsersService
+        await service.signup(email, 'correct_password')
+        await expect(service.signin(email, 'wrong_password')).rejects.toThrow(BadRequestException)
       })
     })
 
