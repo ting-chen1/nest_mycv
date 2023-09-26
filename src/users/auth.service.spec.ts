@@ -15,6 +15,8 @@ describe('AuthService', () => {
 
   // jest beforeEach 同 rspec before(:each)
   beforeEach(async () => {
+    // v1 fakeUsersService
+    // --------------------------------------------
     // create a fake copy of the users service
     // 準備假個 UsersService，滿足
     // 定義 find 跟 create 是因為 AuthService #signin 只用到這兩個
@@ -22,11 +24,36 @@ describe('AuthService', () => {
     // fakeUsersService 定義型別成 Partial<UsersService>
     // 是希望這個 object 的屬性與 UsersService 一樣
     // 內部定義個 function input output 型別一致，提高測試資料的正確性
+    // fakeUsersService = {
+    //   如果情境簡單可以種設計假資料
+    //   find: () => Promise.resolve([]),
+    //   create: (email: string, password: string) => Promise.resolve({ id: 1, email, password } as User)
+    //   // 型別太難定義則可以用 型別斷言強制設定
+    // }
+    // --------------------------------------------
+    // v1 fakeUsersService
+
+    // v2 fakeUsersService
+    // --------------------------------------------
+    const users: User[] = [];
     fakeUsersService = {
-      find: () => Promise.resolve([]),
-      create: (email: string, password: string) => Promise.resolve({ id: 1, email, password } as User)
-      // 型別太難定義則可以用 型別斷言強制設定
+      find: (email: string) => {
+        const filteredUsers = users.filter((user) => user.email === email)
+        return Promise.resolve(filteredUsers);
+      },
+      create: (email: string, password: string) => {
+        const user = {
+          id: users.length + 1,
+          email,
+          password
+        } as User
+        users.push(user)
+        return Promise.resolve(user)
+      }
     }
+    // --------------------------------------------
+    // v2 fakeUsersService
+
 
     // 接著要欺騙 DI 系統，讓他使用下方定義的資訊生成 DI container
     // providers 紀錄的資訊是要注入到 DI container 的材料
@@ -98,6 +125,31 @@ describe('AuthService', () => {
 
       it('throws BadRequestException',async () => {
         await expect(service.signin(email, 'password')).rejects.toThrow(BadRequestException)
+      })
+    })
+
+    context('correct email and password', () => {
+      it('return a user',async () => {
+        const email = 'correct_email@abc.com'
+        const password = 'correct_password'
+
+        // 使用 v1 fakeUsersService
+        // --------------------------------------------
+        // const encriptPassword = '0f280e7581bfabda.c6d8cba27eed00d7a15335b11c57ed6ea4b70422022a3fd82555bfb782e0d1e6'
+        // fakeUsersService.find = () => Promise.resolve([{ email, password: encriptPassword } as User])
+        // const user = await service.signin(email, password)
+        // expect(user).toBeDefined()
+        // const user = await service.signup(email, password)
+        // console.log(user)
+        // 這裡用 signup 取得加密過的密碼
+        // --------------------------------------------
+        // 使用 v1 fakeUsersService
+
+        // 使用 v2 fakeUsersService
+        await service.signup(email, password); // 透過 signup 建立的 user 會存在 users 陣列中
+        const user = await service.signin(email, password); // signin 可以從 users 陣列中找 user
+        expect(user).toBeDefined();
+        // 使用 v2 fakeUsersService
       })
     })
   })
