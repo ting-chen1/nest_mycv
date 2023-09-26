@@ -17,8 +17,8 @@ import { CurrentUserInterceptor } from './interceptors/current-user.interceptor'
     AuthService,
     {
       provide: APP_INTERCEPTOR,
-      useClass: CurrentUserInterceptor
-    }
+      useClass: CurrentUserInterceptor,
+    },
     // 要全域使用 CurrentUserInterceptor 時
     // provide 需明確指定提供到全域的 interceptor
     // 再指定提供的是哪個 class

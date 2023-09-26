@@ -45,7 +45,7 @@ export class UsersService {
 
   async findOne(id: number) {
     // 如果傳入的 id 是 null，typeorm findOneBy 回傳 table 第一筆紀錄
-    if(!id) {
+    if (!id) {
       return null;
     }
     return this.repo.findOneBy({ id });

@@ -1,4 +1,4 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 // 使用 decorator 取得 session 資訊
 // 但 decorator 並不能在 DI 系統中取用到 user repository，但 interceptor 可以
@@ -15,5 +15,5 @@ export const CurrentUser = createParamDecorator(
     const request = context.switchToHttp().getRequest();
     return request.currentUser;
     // return 'hi there'; // previous demo
-  }
-)
+  },
+);

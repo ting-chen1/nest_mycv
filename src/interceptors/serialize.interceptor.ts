@@ -1,4 +1,9 @@
-import { CallHandler, ExecutionContext, NestInterceptor, UseInterceptors } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  NestInterceptor,
+  UseInterceptors,
+} from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { plainToInstance } from 'class-transformer';
 // import { UserDto } from '../users/dto/user.dto'; // 範例暫時寫死 User DTO，後續會改用 constructor 處理
@@ -17,7 +22,6 @@ import { plainToInstance } from 'class-transformer';
 //   在此可以視為後續 route 會執行的 function
 // }
 
-
 // 這裡的型別寫 any 時，使用區塊如果傳入 DTO 以外的資訊
 // typescript 不會顯示錯誤，但實際運行會噴錯
 // 至少要讓 dto 是 class 而非任意資訊
@@ -27,7 +31,7 @@ import { plainToInstance } from 'class-transformer';
 
 // 此 interface 代表的是任何 class
 interface ClassConstructor {
-  new (...args: any[]): {}
+  new (...args: any[]): {};
 }
 export function Serialize(dto: ClassConstructor) {
   return UseInterceptors(new SerializeInterceptor(dto));
@@ -62,7 +66,7 @@ export class SerializeInterceptor implements NestInterceptor {
 
         return plainToInstance(this.dto, data, {
           excludeExtraneousValues: true,
-        })
+        });
       }),
     );
   }

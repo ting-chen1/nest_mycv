@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { randomBytes, scrypt as _script } from 'crypto';
 // randomBytes: 產生 加密用的鹽
@@ -26,7 +30,6 @@ export class AuthService {
     // hash the salt and the password together
     const hash = (await scrypt(password, salt, 32)) as Buffer;
 
-
     // join salt and hash result
     const result = salt + '.' + hash.toString('hex');
 
@@ -39,15 +42,15 @@ export class AuthService {
   async signin(email: string, password: string) {
     // 找到使用者
     const [user] = await this.usersService.find(email);
-    if(!user) {
-      throw new NotFoundException('user not found')
+    if (!user) {
+      throw new NotFoundException('user not found');
     }
 
     // 密碼結構 salt.hash
     const [salt, storedHash] = user.password.split('.');
     const hash = (await scrypt(password, salt, 32)) as Buffer;
     if (storedHash !== hash.toString('hex')) {
-      throw new BadRequestException('bad password')
+      throw new BadRequestException('bad password');
     }
 
     return user;

@@ -9,7 +9,7 @@ import {
   Query,
   NotFoundException,
   Session,
-  UseGuards
+  UseGuards,
   // UseInterceptors,
   // ClassSerializerInterceptor
 } from '@nestjs/common';
@@ -36,7 +36,7 @@ import { AuthGuard } from '../guard/auth.guard';
 export class UsersController {
   constructor(
     private usersService: UsersService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   // @Get('/whoami')
@@ -44,7 +44,6 @@ export class UsersController {
   // whoAmI(@Session() session: any) {
   //   return this.usersService.findOne(session.userId);
   // }
-
 
   // 使用客製化 CurrentUser decorator
   // CurrentUser decorator 搭配 CurrentUserInterceptor
@@ -56,7 +55,6 @@ export class UsersController {
   whoAmI(@CurrentUser() user: User) {
     return user;
   }
-
 
   // @Get('/whoami')
   // 也可以不用 decorator 直接從 request 取得 currentUser
@@ -70,7 +68,7 @@ export class UsersController {
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
     // this.usersService.create(body.email, body.password); // 前期範例用
-    const user = await this.authService.signup(body.email, body.password) // 切換成 authService
+    const user = await this.authService.signup(body.email, body.password); // 切換成 authService
     session.userId = user.id;
     return user;
   }
@@ -89,7 +87,6 @@ export class UsersController {
   signOut(@Session() session: any) {
     session.userId = null;
   }
-
 
   // ----------------------------------------------
 
@@ -134,10 +131,10 @@ export class UsersController {
 
     // with error
     const user = await this.usersService.findOne(parseInt(id));
-    if(!user) {
-      throw new NotFoundException('user not found')
+    if (!user) {
+      throw new NotFoundException('user not found');
     }
-    return user
+    return user;
   }
 
   @Get()
@@ -152,10 +149,7 @@ export class UsersController {
 
   // update 同時有 url param, body param 所以要準備 dto
   @Patch('/:id')
-  updateUser(
-    @Param('id') id: string,
-    @Body() body: UpdateUserDto
-  ) {
-    return this.usersService.update(parseInt(id), body)
+  updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+    return this.usersService.update(parseInt(id), body);
   }
 }

@@ -1,5 +1,5 @@
-import { CanActivate } from "@nestjs/common";
-import { ExecutionContext } from "@nestjs/common";
+import { CanActivate } from '@nestjs/common';
+import { ExecutionContext } from '@nestjs/common';
 
 export class AuthGuard implements CanActivate {
   // context 在此就像是 http 應用程式裡傳進來的 request
