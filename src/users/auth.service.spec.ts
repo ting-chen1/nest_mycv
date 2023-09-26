@@ -4,6 +4,10 @@ import { UsersService } from "./users.service";
 import { User } from './users.entity';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
+// 沒找到類似 rspec context 的 api，所以自己弄個 alias
+let context = describe;
+let target = describe;
+
 // jest describe 同 rspec describe
 describe('AuthService', () => {
   let service: AuthService;
@@ -50,31 +54,51 @@ describe('AuthService', () => {
     // 因為 js 變數 scope 的原因，所以這裡可以取用到 外層的 service
   })
 
-  describe('#signup', () => {
-    it('creates a new user with a salted and hashed password', async () => {
-      const password = '12345'
-      const user = await service.signup('abc@abc.com', password)
-      // 單純比對傳入的 password 與儲存的 password 是否一致
-      expect(user.password).not.toEqual(password);
-      const [salt, hash] = user.password.split('.');
-      // 是否有加鹽
-      expect(salt).toBeDefined();
-      expect(hash).toBeDefined();
+  target('#signup', () => {
+    context('create a new user', () => {
+      it('password is salted and hashed', async () => {
+        const password = '12345'
+        const user = await service.signup('abc@abc.com', password)
+        // 單純比對傳入的 password 與儲存的 password 是否一致
+        expect(user.password).not.toEqual(password);
+        const [salt, hash] = user.password.split('.');
+        // 是否有加鹽
+        expect(salt).toBeDefined();
+        expect(hash).toBeDefined();
+      })
     })
 
-    it('throws an error if user signs up with email that is in use', async () => {
-      // 直接複寫 fakeUsersService find function 來跳鞥測是資料
-      // 這裡是模擬 find function 真的有從 database 查到一筆資料，後續就拋出錯誤
-      let email = 'asdf@asdf.com'
-      fakeUsersService.find = () => Promise.resolve([{ id: 1, email, password: '1' } as User]);
+    context('signs up with used email', () => {
+      it('throws an error', async () => {
+        // 直接複寫 fakeUsersService find function 來跳鞥測是資料
+        // 這裡是模擬 find function 真的有從 database 查到一筆資料，後續就拋出錯誤
+        let email = 'asdf@asdf.com'
+        fakeUsersService.find = () => Promise.resolve([{ id: 1, email, password: '1' } as User]);
 
-      await expect(service.signup(email, 'asdf')).rejects.toThrow(BadRequestException);
-    });
+        await expect(service.signup(email, 'asdf')).rejects.toThrow(BadRequestException);
+      });
+    })
   })
 
-  describe('#signin', () => {
-    it('throws if signin is called with an unused email', async () => {
-      await expect(service.signin('fake_email@abc.com', 'asdf')).rejects.toThrow(NotFoundException);
+  target('#signin', () => {
+    context('with an unused email', () => {
+      it('throws NotFoundException', async () => {
+        await expect(service.signin('fake_email@abc.com', 'asdf')).rejects.toThrow(NotFoundException);
+      })
+    })
+
+    context('with invalid password', () => {
+      const email = 'asdf@asdf.com'
+
+      // 與 rspec 不同，這些假資料設定必須寫在 beforeEach 或 it 裡才會執行
+      // 但共用的變數還是要寫在外層，因為會被 scope 限制
+      beforeEach(async () => {
+        fakeUsersService.find = () => Promise.resolve([{ email, password: 'abc' } as User])
+      })
+
+      it('throws BadRequestException',async () => {
+        await expect(service.signin(email, 'password')).rejects.toThrow(BadRequestException)
+      })
     })
   })
 })
