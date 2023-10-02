@@ -39,4 +39,27 @@ describe('Authentication System (e2e)', () => {
         expect(resEmail).toEqual(email);
       });
   });
+
+  describe('#whoAmI', () => {
+    it('signup as a new user then get the currently logged in user', async () => {
+      const email = 'asdf@asdf.com'
+      // 先模擬註冊取得 response
+      const res = await request(app.getHttpServer())
+        .post('/auth/signup')
+        .send({ email, password: 'asdf' })
+        .expect(201)
+
+      // 從 response 中取得 cookie
+      const cookie = res.get('Set-Cookie')
+
+      // 打到 whoami 且夾帶 cookie 資訊，並取得 response body
+      const { body } = await request(app.getHttpServer())
+        .get('/auth/whoami')
+        .set('Cookie', cookie)
+        .expect(200)
+
+      // 確認 body 的 email 與註冊時的 email 一致
+    expect(body.email).toEqual(email)
+    })
+  })
 });
