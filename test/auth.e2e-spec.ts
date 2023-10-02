@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { setupApp } from '../src/setup-app';
 
 describe('Authentication System (e2e)', () => {
   let app: INestApplication;
@@ -12,6 +13,7 @@ describe('Authentication System (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    setupApp(app);
     await app.init();
   });
 
@@ -31,7 +33,8 @@ describe('Authentication System (e2e)', () => {
       .send({ email, password: 'fake_password' })
       .expect(201)
       .then((res) => {
-        const { id, resEmail } = res.body;
+        const id = res.body.id;
+        const resEmail = res.body.email;
         expect(id).toBeDefined();
         expect(resEmail).toEqual(email);
       });
