@@ -7,3 +7,11 @@ global.beforeEach(async () => {
 
   }
 })
+
+global.afterAll(async () => {
+  try {
+    await rm(`${__dirname}/../test.sqlite`)
+  } catch (error) {
+
+  }
+})
