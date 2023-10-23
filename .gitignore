@@ -1,4 +1,6 @@
 .env.*
+db.sqlite
+test.sqlite
 
 # compiled output
 /dist

@@ -1,3 +1,4 @@
+import { Report } from '../reports/reports.entity';
 import {
   AfterInsert,
   AfterUpdate,
@@ -5,8 +6,11 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
+  OneToMany
 } from 'typeorm';
+import { report } from 'process';
 // import { Exclude } from 'class-transformer';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -22,6 +26,10 @@ export class User {
   // 再到 controller 於該 route 使用 @UseInterceptors(ClassSerializerInterceptor)
   // 表示該 route 會過濾這些資訊
   password: string;
+
+  // OneToMany 不會影響 database 欄位
+  @OneToMany(() => Report, (report) => report.user)
+  reports: Report[];
 
   @AfterInsert()
   logInser() {

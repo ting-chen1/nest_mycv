@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '../users/users.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 @Entity()
 export class Report {
@@ -25,4 +26,9 @@ export class Report {
 
   @Column()
   mileage: number;
+
+  // ManyToOne 會影響 database 欄位
+  // 會自動加上 user_id
+  @ManyToOne(() => User, (user) => user.reports)
+  user: User;
 }
